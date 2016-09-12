@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+  - 6.0.0
+  - 6.3.1
+
+before_install:
+  - npm set progress=false
+  - npm install -g eslint eslint-plugin-varspacing babel-cli
+
+before_script: npm run lint

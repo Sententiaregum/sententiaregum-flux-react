@@ -1,0 +1,17 @@
+environment:
+  nodejs_version: "6.3"
+
+install:
+  - npm install -g babel-cli eslint-plugin-varspacing eslint
+  - npm install
+
+test_script:
+  - node --version
+  - npm --version
+  - npm run lint
+  - npm run test
+
+init:
+  - git config --global core.autocrlf true
+
+build: false
