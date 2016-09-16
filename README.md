@@ -2,8 +2,8 @@
 
 
 [![Build Status](https://travis-ci.org/Sententiaregum/flux-container.svg?branch=master)](https://travis-ci.org/Sententiaregum/sententiaregum-flux-react)
-[![NPM Version](https://badge.fury.io/js/sententiaregum-flux-container.svg)](https://www.npmjs.com/package/sententiaregum-flux-react)
-[![Build status](https://ci.appveyor.com/api/projects/status/qk0rs9ytq2k6c2xb/branch/master?svg=true)](https://ci.appveyor.com/project/Ma27/sententiaregum-flux-react/branch/master)
+[![NPM Version](https://badge.fury.io/js/sententiaregum-flux-react.svg)](https://www.npmjs.com/package/sententiaregum-flux-react)
+[![Build status](https://ci.appveyor.com/api/projects/status/sb90yve8u7i7xgf2?svg=true)](https://ci.appveyor.com/project/Ma27/sententiaregum-flux-react)
 
 This package simplifies the state refresh of a store and the re-rendering of the connected views.
 
