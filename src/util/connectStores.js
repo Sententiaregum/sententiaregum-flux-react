@@ -40,41 +40,6 @@ const container = new class {
 };
 
 /**
- * Builds and validates the component's method.
- *
- * @param {React.Component} Component The react.js component.
- * @param {String}          method    The method to extract.
- * @param {String}          alias     The alias of the instance.
- * @param {React.Component} context   The actual context (the parent class, not the recreated class).
- *
- * @returns {Function} The function to extract.
- */
-function getCallbackForComponent(Component, method, alias, context) {
-  invariant(
-    typeof Component.prototype[method] === 'function',
-    `Method ${method} must be a function!`
-  );
-
-  return container.bind(Component.prototype[method], context, alias);
-}
-
-/**
- * Executes a single handler.
- *
- * @param {React.Component} Component     The react component.
- * @param {Function}        handler       The generated handler.
- * @param {Object}          subscriptions The subscriptions defined by the component.
- * @param {String}          alias         The alias of the context handling.
- * @param {String}          method        The method to handle.
- * @param {React.Component} context       The actual context (the parent class, not the recreated class).
- *
- * @returns {void}
- */
-function executeHandler(Component, handler, subscriptions, alias, method, context) {
-  handler(getCallbackForComponent(Component, method, `${alias}::${method}`, context), subscriptions[method]);
-}
-
-/**
  * Simple higher order function which handles store subscriptions.
  *
  * @param {React.Component} Component     The component to connect.
@@ -86,5 +51,10 @@ function executeHandler(Component, handler, subscriptions, alias, method, contex
  * @returns {void}
  */
 export default (Component, context, subscriptions, alias, handler) => Object.keys(subscriptions).forEach(method => {
-  executeHandler(Component, handler, subscriptions, alias, method, context);
+  invariant(
+    typeof Component.prototype[method] === 'function',
+    `Method ${method} must be a function!`
+  );
+
+  handler(container.bind(Component.prototype[method], context, `${alias}::${method}`), subscriptions[method]);
 });

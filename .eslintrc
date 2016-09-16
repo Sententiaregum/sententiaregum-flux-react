@@ -13,5 +13,11 @@
     "node": true,
     "mocha": true
   },
+  "rules": {
+    "no-unused-vars": [
+      2,
+      { "varsIgnorePattern": "React" }
+    ]
+  },
   "plugins": ["varspacing"]
 }

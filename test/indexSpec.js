@@ -15,17 +15,11 @@ import React, { Component } from 'react';
 import { store, runAction } from 'sententiaregum-flux-container';
 import { expect } from 'chai';
 import { mount } from 'enzyme';
-import { jsdom } from 'jsdom';
+import { stub } from 'sinon';
 
 describe('sententiaregum-flux-react', () => {
-  before(() => {
-    global.window    = jsdom('<html><head></head><body></body></html>').defaultView;
-    global.document  = window.document;
-    global.navigator = window.navigator;
-  });
-
-  it('connects store with state', () => {
-    const testStore = store({
+  function generateStore() {
+    return store({
       EVENT: {
         params:   ['text'],
         function: text => {
@@ -33,10 +27,17 @@ describe('sententiaregum-flux-react', () => {
         }
       }
     });
-
-    const actionCreator = publish => ({
+  }
+  function generateActionCreator() {
+    return publish => ({
       EVENT: () => publish({ text: 'Goodbye!' })
     });
+  }
+
+  it('connects store with state', () => {
+    const testStub      = stub();
+    const testStore     = generateStore();
+    const actionCreator = generateActionCreator();
 
     const Cmp = subscribeStores(class extends Component {
       constructor() {
@@ -50,6 +51,9 @@ describe('sententiaregum-flux-react', () => {
         // delegate calls to further methods
         // to ensure that context is bound correctly
         this.modify(testStore.getStateValue('text'));
+
+        // log execution times
+        testStub();
       }
       modify(newText) {
         this.setState({ text: newText });
@@ -59,11 +63,56 @@ describe('sententiaregum-flux-react', () => {
     });
 
     const rendered = mount(<Cmp />);
-
     expect(rendered.text()).to.equal('Hi!');
-
     runAction('EVENT', actionCreator);
-
     expect(rendered.text()).to.equal('Goodbye!');
+    rendered.unmount();
+    runAction('EVENT', actionCreator);
+    expect(testStub.calledOnce).to.equal(true);
+  });
+
+  it('executes `componentDidMount` and `componentWillUnmount` of the parent component', () => {
+    const testStub      = stub();
+    const mountHook     = stub();
+    const unmountHook   = stub();
+    const testStore     = generateStore();
+    const actionCreator = generateActionCreator();
+
+    const Cmp = subscribeStores(class extends Component {
+      constructor() {
+        super();
+        this.state = { text: 'Hi!' };
+      }
+      componentDidMount() {
+        mountHook();
+      }
+      componentWillUnmount() {
+        unmountHook();
+      }
+      render() {
+        return <h1>{this.state.text}</h1>;
+      }
+      refresh() {
+        // delegate calls to further methods
+        // to ensure that context is bound correctly
+        this.modify(testStore.getStateValue('text'));
+
+        // log execution times
+        testStub();
+      }
+      modify(newText) {
+        this.setState({ text: newText });
+      }
+    }, {
+      'refresh': testStore
+    });
+
+    const rendered = mount(<Cmp />);
+    expect(mountHook.calledOnce).to.equal(true);
+    expect(rendered.text()).to.equal('Hi!');
+    runAction('EVENT', actionCreator);
+    expect(rendered.text()).to.equal('Goodbye!');
+    rendered.unmount();
+    expect(unmountHook.calledOnce).to.equal(true);
   });
 });
