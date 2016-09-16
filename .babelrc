@@ -4,6 +4,9 @@
       "retainLines": true
     }
   },
+  "plugins": [
+    "transform-react-jsx"
+  ],
   "presets": [
     "es2015",
     "stage-0"
