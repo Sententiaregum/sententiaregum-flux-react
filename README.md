@@ -25,7 +25,7 @@ to subscribe:
 
 ``` javascript
 import React, { Component } from 'react';
-import subscribeStores from 'sententiaregum-flux-react';
+import { subscribeStores } from 'sententiaregum-flux-react';
 import postStore from '../stores/postStore';
 
 const component = props => {

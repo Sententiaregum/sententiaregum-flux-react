@@ -44,7 +44,7 @@ import buildState from './util/buildState';
  *
  * @returns {void}
  */
-export default (Wrapped, subscriptions) => class extends Component {
+export const subscribeStores = (Wrapped, subscriptions) => class extends Component {
   /**
    * Constructor.
    * Simple shortcut to keep the `refresh` handler.

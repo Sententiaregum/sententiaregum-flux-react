@@ -10,7 +10,7 @@
 
 'use strict';
 
-import subscribeStores from '../src/index';
+import { subscribeStores } from '../src/index';
 import React from 'react';
 import { store, runAction, subscribe } from 'sententiaregum-flux-container';
 import { expect } from 'chai';
