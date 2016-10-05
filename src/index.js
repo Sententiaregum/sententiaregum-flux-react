@@ -13,6 +13,7 @@
 import { connector } from 'sententiaregum-flux-container';
 import React, { Component } from 'react';
 import buildState from './util/buildState';
+import pure from './util/pure';
 
 /**
  * Connects a react.js component with `flux-container`.
@@ -45,6 +46,15 @@ import buildState from './util/buildState';
  * @returns {void}
  */
 export const subscribeStores = (Wrapped, subscriptions) => class extends Component {
+  /**
+   * Simple getter which provides access for the wrapped instance.
+   *
+   * @returns {React.Component}
+   */
+  static wrapped() {
+    return Wrapped;
+  }
+
   /**
    * Constructor.
    * Simple shortcut to keep the `refresh` handler.
@@ -100,3 +110,5 @@ export const subscribeStores = (Wrapped, subscriptions) => class extends Compone
     return <Wrapped {...this.state} />;
   }
 };
+
+export { pure };
