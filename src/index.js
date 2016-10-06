@@ -103,8 +103,9 @@ export const subscribeStores = (Wrapped, subscriptions) => class extends Compone
 
   /**
    * Renders the component into the DOM.
-   *
    * Basically it creates a `React.Element` instance from the parent component including its state values.
+   *
+   * @returns {React.Element} The element markup.
    */
   render() {
     return <Wrapped {...this.state.store} />;
