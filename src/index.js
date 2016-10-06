@@ -64,7 +64,7 @@ export const subscribeStores = (Wrapped, subscriptions) => class extends Compone
   constructor() {
     super();
 
-    this.state             = buildState(subscriptions);
+    this.state             = { store: buildState(subscriptions) };
     this.refreshChildState = this.refresh.bind(this);
   }
 
@@ -98,7 +98,7 @@ export const subscribeStores = (Wrapped, subscriptions) => class extends Compone
    * @returns {void}
    */
   refresh() {
-    this.setState(buildState(subscriptions));
+    this.setState({ store: buildState(subscriptions) });
   }
 
   /**
@@ -107,7 +107,7 @@ export const subscribeStores = (Wrapped, subscriptions) => class extends Compone
    * Basically it creates a `React.Element` instance from the parent component including its state values.
    */
   render() {
-    return <Wrapped {...this.state} />;
+    return <Wrapped {...this.state.store} />;
   }
 };
 
