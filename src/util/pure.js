@@ -11,6 +11,7 @@
 'use strict';
 
 import React from 'react';
+import invariant from 'invariant';
 
 /**
  * A simple helper function which provides access to the pure component.
@@ -24,4 +25,13 @@ import React from 'react';
  *
  * @returns {React.Element} A newly created react.js element.
  */
-export default (connectedParent, props) => React.createElement(connectedParent.wrapped(), props);
+export default (connectedParent, props) => {
+  invariant(
+    typeof connectedParent.wrapped !== 'undefined',
+    'Invalid component given! The `pure()` function can\'t handle '
+    + 'functions that were not built by `subsribeStores()` as they can\'t provide '
+    + 'the wrapped component easily!'
+  );
+
+  return React.createElement(connectedParent.wrapped(), props);
+};

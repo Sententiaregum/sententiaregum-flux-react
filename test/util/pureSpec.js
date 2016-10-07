@@ -27,4 +27,9 @@ describe('util::pure', () => {
     const markup = shallow(pure(Cmp, { header: 'foo' }));
     expect(markup.text()).to.equal('foo');
   });
+
+  it('throws an error if an invalid component is given', () => {
+    const component = () => <h1>Foo</h1>;
+    expect(() => pure(component)).to.throw('Invalid component given! The `pure()` function can\'t handle functions that were not built by `subsribeStores()` as they can\'t provide the wrapped component easily!');
+  });
 });
