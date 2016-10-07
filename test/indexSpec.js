@@ -21,16 +21,15 @@ describe('sententiaregum-flux-react', () => {
   function generateStore() {
     return store({
       EVENT: {
-        params:   ['text'],
-        function: text => {
+        function: ({ text }) => {
           return { text };
         }
       }
     });
   }
   function generateActionCreator() {
-    return publish => ({
-      EVENT: () => publish({ text: 'Goodbye!' })
+    return () => ({
+      EVENT: publish => publish({ text: 'Goodbye!' })
     });
   }
 
