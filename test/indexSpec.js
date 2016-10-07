@@ -10,109 +10,55 @@
 
 'use strict';
 
-import subscribeStores from '../src/index';
+import { subscribeStores } from '../src/index';
 import React, { Component } from 'react';
-import { store, runAction } from 'sententiaregum-flux-container';
+import { store, runAction, subscribe } from 'sententiaregum-flux-container';
 import { expect } from 'chai';
 import { mount } from 'enzyme';
-import { stub } from 'sinon';
 
 describe('sententiaregum-flux-react', () => {
   function generateStore() {
     return store({
-      EVENT: {
-        params:   ['text'],
-        function: text => {
-          return { text };
-        }
-      }
-    });
+      EVENT: subscribe(subscribe.chain()(({ text }) => ({ text })))
+    }, { text: 'Hi!' });
   }
   function generateActionCreator() {
-    return publish => ({
-      EVENT: () => publish({ text: 'Goodbye!' })
+    return () => ({
+      EVENT: publish => publish({ text: 'Goodbye!' })
     });
+  }
+  function checkComponent(actionCreator, Cmp) {
+    const rendered = mount(<Cmp />);
+    expect(rendered.find('h1').text()).to.equal('Hi!');
+    runAction('EVENT', actionCreator);
+    expect(rendered.text()).to.equal('Goodbye!');
+    rendered.unmount();
+    runAction('EVENT', actionCreator);
   }
 
   it('connects store with state', () => {
-    const testStub      = stub();
     const testStore     = generateStore();
     const actionCreator = generateActionCreator();
 
-    const Cmp = subscribeStores(class extends Component {
-      constructor() {
-        super();
-        this.state = { text: 'Hi!' };
-      }
-      render() {
-        return <h1>{this.state.text}</h1>;
-      }
-      refresh() {
-        // delegate calls to further methods
-        // to ensure that context is bound correctly
-        this.modify(testStore.getStateValue('text'));
+    const component = props => <h1>{props.header}</h1>;
 
-        // log execution times
-        testStub();
-      }
-      modify(newText) {
-        this.setState({ text: newText });
-      }
-    }, {
-      'refresh': testStore
-    });
-
-    const rendered = mount(<Cmp />);
-    expect(rendered.text()).to.equal('Hi!');
-    runAction('EVENT', actionCreator);
-    expect(rendered.text()).to.equal('Goodbye!');
-    rendered.unmount();
-    runAction('EVENT', actionCreator);
-    expect(testStub.calledOnce).to.equal(true);
+    checkComponent(actionCreator, subscribeStores(component, {
+      header: [testStore, 'text']
+    }));
   });
 
-  it('executes `componentDidMount` and `componentWillUnmount` of the parent component', () => {
-    const testStub      = stub();
-    const mountHook     = stub();
-    const unmountHook   = stub();
+  it('it behaves well with a stateless component', () => {
     const testStore     = generateStore();
     const actionCreator = generateActionCreator();
 
-    const Cmp = subscribeStores(class extends Component {
-      constructor() {
-        super();
-        this.state = { text: 'Hi!' };
-      }
-      componentDidMount() {
-        mountHook();
-      }
-      componentWillUnmount() {
-        unmountHook();
-      }
+    class component extends Component {
       render() {
-        return <h1>{this.state.text}</h1>;
+        return <h1>{this.props.header}</h1>;
       }
-      refresh() {
-        // delegate calls to further methods
-        // to ensure that context is bound correctly
-        this.modify(testStore.getStateValue('text'));
+    }
 
-        // log execution times
-        testStub();
-      }
-      modify(newText) {
-        this.setState({ text: newText });
-      }
-    }, {
-      'refresh': testStore
-    });
-
-    const rendered = mount(<Cmp />);
-    expect(mountHook.calledOnce).to.equal(true);
-    expect(rendered.text()).to.equal('Hi!');
-    runAction('EVENT', actionCreator);
-    expect(rendered.text()).to.equal('Goodbye!');
-    rendered.unmount();
-    expect(unmountHook.calledOnce).to.equal(true);
+    checkComponent(actionCreator, subscribeStores(component, {
+      header: [testStore, 'text']
+    }));
   });
 });

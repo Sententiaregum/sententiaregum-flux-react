@@ -11,7 +11,9 @@
 'use strict';
 
 import { connector } from 'sententiaregum-flux-container';
-import connectStores from './util/connectStores';
+import React, { Component } from 'react';
+import buildState from './util/buildState';
+import pure from './util/pure';
 
 /**
  * Connects a react.js component with `flux-container`.
@@ -23,60 +25,91 @@ import connectStores from './util/connectStores';
  * Example:
  *
  * import subscribeStores from 'sententiaregum-flux-react';
- * class TestComponent extends Component {
- *   render() {
- *     // ...
- *   }
- * }
- * export default subscribeStores(TestComponent, { 'newPosts': postStore });
  *
- * @param {React.Component} Component     The react component.
+ * const component = props => {
+ *   return (
+ *     <h1>{props.header}</h1>
+ *     <div>
+ *       <ul>
+ *         {props.items.map(item => <li>{item}</li>)}
+ *       </ul>
+ *     </div
+ *   );
+ * };
+ * export default subscribeStores(component, { foo: [postStore, 'header'], items: [postStore, 'data.items'] });
+ *
+ * Please note that the second argument is the property path evaluated by the store.
+ *
+ * @param {React.Component} Wrapped       The react component.
  * @param {Object}          subscriptions The subscriptions declared for each component.
  *
  * @returns {void}
  */
-export default (Component, subscriptions) => class extends Component {
+export const subscribeStores = (Wrapped, subscriptions) => class extends Component {
   /**
-   * Lifecycle hook for react.js.
-   * The `componentDidMount` is a hook which will be executed right after
-   * the component was mounted. When it's mounted, the view can subscribe stores
-   * and reload itself if the state is updated.
+   * Simple getter which provides access for the wrapped instance.
    *
-   * Here the subscriptions for all defined stores will be created.
+   * @returns {React.Component}
+   */
+  static wrapped() {
+    return Wrapped;
+  }
+
+  /**
+   * Constructor.
+   * Simple shortcut to keep the `refresh` handler.
+   *
+   * @returns {void}
+   */
+  constructor() {
+    super();
+
+    this.state             = { store: buildState(subscriptions) };
+    this.refreshChildState = this.refresh.bind(this);
+  }
+
+  /**
+   * Hook to be executed when this component is mounted.
+   * This is a component which wraps a child and hooks for the child into the store
+   * processes and evaluates the definitions of the child to receive state from a store.
+   *
+   * This method traverses through the store definitions and connects them with this component.
    *
    * @returns {void}
    */
   componentDidMount() {
-    if (typeof Component.prototype.componentDidMount === 'function') {
-      super.componentDidMount();
-    }
-
-    connectStores(Component, this, subscriptions, this._alias(), (method, store) => connector(store).subscribe(method));
+    Object.values(subscriptions).forEach(([store]) => connector(store).subscribe(this.refreshChildState));
   }
 
   /**
-   * Lifecycle hook for react.js.
-   * The `componentWillUnmount` is a hook which will be triggered right before
-   * the component is about to be unmounted from the DOM. After that it's impossible
-   * to update the state when a stores changes, so the subscriptions will be dropped.
+   * Hook to be executed when the component is about to be unmounted.
    *
    * @returns {void}
    */
   componentWillUnmount() {
-    if (typeof Component.prototype.componentWillUnmount === 'function') {
-      super.componentWillUnmount();
-    }
-
-    connectStores(Component, this, subscriptions, this._alias(), (method, store) => connector(store).unsubscribe(method));
+    Object.values(subscriptions).forEach(([store]) => connector(store).unsubscribe(this.refreshChildState));
   }
 
   /**
-   * Tiny helper to generate a unique ID.
+   * Hook which refreshes the whole object state.
+   * It re-evaluates the value for each subscription and passes it into the state
+   * to cause a re-rendering of the whole tree.
    *
-   * @returns {String} The class alias.
-   * @private
+   * @returns {void}
    */
-  _alias() {
-    return !this.alias ? this.alias = `${this.constructor.name}::${Math.random()}` : this.alias;
+  refresh() {
+    this.setState({ store: buildState(subscriptions) });
+  }
+
+  /**
+   * Renders the component into the DOM.
+   * Basically it creates a `React.Element` instance from the parent component including its state values.
+   *
+   * @returns {React.Element} The element markup.
+   */
+  render() {
+    return <Wrapped {...this.state.store} />;
   }
 };
+
+export { pure };

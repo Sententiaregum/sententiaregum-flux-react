@@ -25,27 +25,32 @@ to subscribe:
 
 ``` javascript
 import React, { Component } from 'react';
-import subscribeStores from 'sententiaregum-flux-react';
+import { subscribeStores } from 'sententiaregum-flux-react';
 import postStore from '../stores/postStore';
 
-export default subscribeStores(class extends Component {
-  constructor() {
-    this.state = { posts: [] };
-  }
-  render() {
-    // render the posting list
-  }
-  newPost() {
-    this.setState({
-      posts: postStore.getState()
-    });
-  }
-}, {
-  'newPost': postStore
+const component = props => {
+  return (
+    <div>
+      <h1>{props.header}</h1>
+      <p>
+        <div style={props.style}>{props.text}</div>
+        <ul>
+          {props.textItems.map(item => <li>{item}</li>}
+        </ul>
+      </p>
+    </div>
+  );
+};
+
+export default subscribeStores(component, {
+  header:    [postStore, 'texts.header'],
+  text:      [postStore, 'texts.info'],
+  textItems: [postStore, 'textItems']
 });
 ```
 
-So whenever the state of the `postStore` changes, the `newPost` method of this component will be triggered.
+So each item of the `props` object needs a definition which is an array. The first array element defines the store where the information should be taken from,
+the second item is a property path that needs to be evaluated by the store in order to find the value.
 
 ## Contributing
 
@@ -54,3 +59,10 @@ Further information about contributing can be found in the [CONTRIBUTING.md](htt
 ## License
 
 Please review the [`LICENSE`](https://github.com/Sententiaregum/sententiaregum-flux-react/blob/master/LICENSE) file that was distributed with this source code.
+
+## v1.0
+
+`v1.0` contained an approach which relied on inheritance. Although it worked quite well, it had the huge downside
+that no functional/pure components could be used and it was a bit more complicated as it dug into the prototype of the class.
+
+`v1.0` is also supported and can be found at the [`v1.0.x` branch](https://github.com/Sententiaregum/sententiaregum-flux-react/tree/v1.0.x).
