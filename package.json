@@ -2,7 +2,7 @@
   "name": "sententiaregum-flux-react",
   "version": "2.0.0",
   "description": "A bridge which connects flux-container with React.js",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "BABEL_ENV=testing npm run test-bare",
     "lint": "eslint ./src",
@@ -19,7 +19,6 @@
     "Flux",
     "React"
   ],
-  "index": "lib/index.js",
   "author": {
     "name": "Maximilian Bosch",
     "email": "maximilian.bosch.27@gmail.com",
