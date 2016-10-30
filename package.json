@@ -1,6 +1,6 @@
 {
   "name": "sententiaregum-flux-react",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A bridge which connects flux-container with React.js",
   "main": "lib/index.js",
   "scripts": {
